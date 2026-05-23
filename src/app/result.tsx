@@ -5,7 +5,7 @@ import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 
 export default function ResultScreen() {
-  const { score, correct, incorrect, total } = useLocalSearchParams();
+  const { score, correct, incorrect, total, accuracy, averageTime } = useLocalSearchParams();
 
   return (
     <View className="flex-1 bg-slate-100 px-6 pt-14">
@@ -43,11 +43,11 @@ export default function ResultScreen() {
             </Text>
 
             <Text className="text-lg text-slate-900">
-              Precisión: 0%
+              Precisión: {accuracy}%
             </Text>
 
             <Text className="text-lg text-slate-900">
-              Tiempo promedio: 0s
+              Tiempo promedio {String(averageTime).replace('.', ',')} s
             </Text>
           </View>
         </AppCard>
