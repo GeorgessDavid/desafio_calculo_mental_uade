@@ -2,6 +2,7 @@
   "expo": {
     "name": "calculo-mental",
     "slug": "calculo-mental",
+    "useInterfaceStyle": "light",
     "plugins": [
       "expo-router",
       [

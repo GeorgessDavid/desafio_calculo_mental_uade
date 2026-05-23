@@ -22,6 +22,10 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: "fade",
+        contentStyle: {
+          backgroundColor: "#f1f5f9"
+        }
       }}
     />
   );
