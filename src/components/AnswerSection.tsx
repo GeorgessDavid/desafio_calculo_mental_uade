@@ -1,14 +1,7 @@
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
-
-import { GameMode } from "../hooks/useGame";
+import { GameMode, ProcessAnswerParams } from "../types/game";
 import AppButton from "./AppButton";
 import AppCard from "./AppCard";
-
-type ProcessAnswerParams = {
-  answered: boolean;
-  userAnswer?: number;
-  booleanAnswer?: boolean;
-};
 
 type AnswerSectionProps = {
   mode: GameMode;

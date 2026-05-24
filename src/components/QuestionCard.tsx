@@ -1,6 +1,5 @@
 import { Text } from "react-native";
-
-import { GameMode } from "../hooks/useGame";
+import { GameMode } from "../types/game";
 import AppCard from "./AppCard";
 
 type QuestionCardProps = {

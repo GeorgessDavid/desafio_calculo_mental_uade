@@ -6,8 +6,9 @@ import GameProgressCard from "../components/GameProgressCard";
 import GameStatsCard from "../components/GameStatsCard";
 import QuestionCard from "../components/QuestionCard";
 import { DIFFICULTIES, GAME_MODES } from "../constants/gameConfig";
-import { GameMode, useGame } from "../hooks/useGame";
+import { useGame } from "../hooks/useGame";
 import { Difficulty } from "../logic/generateOperation";
+import { GameMode } from '../types/game';
 
 const getParamValue = (
   value: string | string[] | undefined,
