@@ -1,34 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
+import StatBox from "../components/StatBox";
+import TimerBar from "../components/TimerBar";
 import { DIFFICULTIES, GAME_MODES } from "../constants/gameConfig";
-import { calculateScore } from "../logic/calculateScore";
-import { generateChoices } from "../logic/generateChoices";
-import {
-  Difficulty,
-  generateOperation,
-  MathOperation,
-} from "../logic/generateOperation";
-
-type GameMode = "classic" | "true_false" | "multiple_choice" | "time_attack";
-
-type CurrentQuestion = {
-  operation: MathOperation;
-  choices: number[];
-  shownAnswer: number;
-  isStatementCorrect: boolean;
-  startedAt: number;
-};
+import { GameMode, useGame } from "../hooks/useGame";
+import { Difficulty } from "../logic/generateOperation";
 
 const getParamValue = (
   value: string | string[] | undefined,
@@ -46,252 +24,42 @@ const isValidDifficulty = (value: string): value is Difficulty => {
 };
 
 const isValidMode = (value: string): value is GameMode => {
-  return ["classic", "true_false", "multiple_choice", "time_attack"].includes(
-    value
-  );
-};
-
-const getRandomOffset = () => {
-  const offsets = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  return offsets[Math.floor(Math.random() * offsets.length)];
-};
-
-const buildQuestion = (
-  difficulty: Difficulty,
-  mode: GameMode
-): CurrentQuestion => {
-  const operation = generateOperation(difficulty);
-
-  let shownAnswer = operation.answer;
-  let isStatementCorrect = true;
-
-  if (mode === "true_false") {
-    isStatementCorrect = Math.random() > 0.5;
-
-    if (!isStatementCorrect) {
-      shownAnswer = operation.answer + getRandomOffset();
-    }
-  }
-
-  return {
-    operation,
-    choices: generateChoices(operation.answer),
-    shownAnswer,
-    isStatementCorrect,
-    startedAt: Date.now(),
-  };
+  return [
+    "classic",
+    "true_false",
+    "multiple_choice",
+    "time_attack",
+  ].includes(value);
 };
 
 export default function GameScreen() {
   const params = useLocalSearchParams();
 
-  const difficulty = useMemo<Difficulty>(() => {
-    const value = getParamValue(params.difficulty, "easy");
-    return isValidDifficulty(value) ? value : "easy";
-  }, [params.difficulty]);
+  const difficultyParam = getParamValue(params.difficulty, "easy");
+  const modeParam = getParamValue(params.mode, "classic");
+  const questionsParam = getParamValue(params.questions, "10");
 
-  const mode = useMemo<GameMode>(() => {
-    const value = getParamValue(params.mode, "classic");
-    return isValidMode(value) ? value : "classic";
-  }, [params.mode]);
+  const difficulty = isValidDifficulty(difficultyParam)
+    ? difficultyParam
+    : "easy";
 
-  const totalQuestions = useMemo(() => {
-    const value = Number(getParamValue(params.questions, "10"));
-    return Number.isNaN(value) || value <= 0 ? 10 : value;
-  }, [params.questions]);
+  const mode = isValidMode(modeParam) ? modeParam : "classic";
 
-  const difficultyData = DIFFICULTIES.find((item) => item.id === difficulty);
-  const modeData = GAME_MODES.find((item) => item.id === mode);
+  const totalQuestions = Number.isNaN(Number(questionsParam))
+    ? 10
+    : Number(questionsParam);
 
-  const timePerQuestion = difficultyData?.timePerQuestion ?? 10;
-
-  const isTimeAttack = mode === "time_attack";
-
-  const initialTime = isTimeAttack
-    ? totalQuestions * timePerQuestion
-    : timePerQuestion;
-
-  const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestion>(() =>
-    buildQuestion(difficulty, mode)
+  const difficultyData = DIFFICULTIES.find(
+    (item) => item.id === difficulty
   );
 
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const [remainingTime, setRemainingTime] = useState(initialTime);
-  const [answerInput, setAnswerInput] = useState("");
+  const modeData = GAME_MODES.find((item) => item.id === mode);
 
-  const [score, setScore] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [incorrectAnswers, setIncorrectAnswers] = useState(0);
-  const [unanswered, setUnanswered] = useState(0);
-  const [responseTimes, setResponseTimes] = useState<number[]>([]);
-
-  const [locked, setLocked] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-
-  const finishGame = ({
-    finalScore,
-    finalCorrect,
-    finalIncorrect,
-    finalUnanswered,
-    finalResponseTimes,
-  }: {
-    finalScore: number;
-    finalCorrect: number;
-    finalIncorrect: number;
-    finalUnanswered: number;
-    finalResponseTimes: number[];
-  }) => {
-    const answeredQuestions = finalCorrect + finalIncorrect;
-    const totalPlayed = finalCorrect + finalIncorrect + finalUnanswered;
-
-    const accuracy =
-      totalPlayed === 0
-        ? 0
-        : Math.round((finalCorrect / totalPlayed) * 100);
-
-    const averageTime =
-      finalResponseTimes.length === 0
-        ? 0
-        : finalResponseTimes.reduce((acc, item) => acc + item, 0) /
-        finalResponseTimes.length;
-
-    router.replace({
-      pathname: "/result",
-      params: {
-        score: String(finalScore),
-        correct: String(finalCorrect),
-        incorrect: String(finalIncorrect),
-        unanswered: String(finalUnanswered),
-        answered: String(answeredQuestions),
-        totalPlayed: String(totalPlayed),
-        totalConfigured: String(totalQuestions),
-        accuracy: String(accuracy),
-        averageTime: averageTime.toFixed(2),
-        difficulty,
-        mode,
-      },
-    });
-  };
-
-  const goToNextQuestion = () => {
-    setCurrentQuestion(buildQuestion(difficulty, mode));
-    setCurrentIndex((prev) => prev + 1);
-    setAnswerInput("");
-    setFeedback(null);
-    setLocked(false);
-
-    if (!isTimeAttack) {
-      setRemainingTime(timePerQuestion);
-    }
-  };
-
-  const processAnswer = ({
-    answered,
-    userAnswer,
-    booleanAnswer,
-  }: {
-    answered: boolean;
-    userAnswer?: number;
-    booleanAnswer?: boolean;
-  }) => {
-    if (locked) return;
-
-    setLocked(true);
-    Keyboard.dismiss();
-
-    const responseTime = (Date.now() - currentQuestion.startedAt) / 1000;
-
-    let isCorrect = false;
-
-    if (!answered) {
-      isCorrect = false;
-    } else if (mode === "true_false") {
-      isCorrect = booleanAnswer === currentQuestion.isStatementCorrect;
-    } else {
-      isCorrect = userAnswer === currentQuestion.operation.answer;
-    }
-
-    const points = calculateScore({
-      isCorrect,
-      answered,
-      responseTime,
-      maxTime: timePerQuestion,
-    });
-
-    const nextScore = score + points;
-    const nextCorrect = correctAnswers + (answered && isCorrect ? 1 : 0);
-    const nextIncorrect = incorrectAnswers + (answered && !isCorrect ? 1 : 0);
-    const nextUnanswered = unanswered + (!answered ? 1 : 0);
-    const nextResponseTimes = answered
-      ? [...responseTimes, responseTime]
-      : responseTimes;
-
-    setScore(nextScore);
-    setCorrectAnswers(nextCorrect);
-    setIncorrectAnswers(nextIncorrect);
-    setUnanswered(nextUnanswered);
-    setResponseTimes(nextResponseTimes);
-
-    if (!answered) {
-      setFeedback(`Sin respuesta (${points} puntos)`);
-    } else if (isCorrect) {
-      setFeedback(`Correcto (+${points} puntos)`);
-    } else {
-      setFeedback(`Incorrecto (${points} puntos)`);
-    }
-
-    const shouldFinishByQuestions = currentIndex >= totalQuestions;
-    const shouldFinishByTimeAttackError = isTimeAttack && !isCorrect;
-
-    setTimeout(() => {
-      if (shouldFinishByQuestions || shouldFinishByTimeAttackError) {
-        finishGame({
-          finalScore: nextScore,
-          finalCorrect: nextCorrect,
-          finalIncorrect: nextIncorrect,
-          finalUnanswered: nextUnanswered,
-          finalResponseTimes: nextResponseTimes,
-        });
-
-        return;
-      }
-
-      goToNextQuestion();
-    }, 700);
-  };
-
-  useEffect(() => {
-    if (locked) return;
-
-    const interval = setInterval(() => {
-      setRemainingTime((prev) => {
-        if (prev <= 0) return 0;
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [locked, currentQuestion]);
-
-  useEffect(() => {
-    if (remainingTime > 0 || locked) return;
-
-    processAnswer({
-      answered: false,
-    });
-  }, [remainingTime, locked]);
-
-  const submitTextAnswer = () => {
-    if (answerInput.trim() === "") return;
-
-    processAnswer({
-      answered: true,
-      userAnswer: Number(answerInput),
-    });
-  };
-
-  const timerTotal = isTimeAttack ? initialTime : timePerQuestion;
-  const timerPercentage = Math.max(0, (remainingTime / timerTotal) * 100);
+  const game = useGame({
+    difficulty,
+    mode,
+    totalQuestions,
+  });
 
   return (
     <ScrollView
@@ -305,42 +73,48 @@ export default function GameScreen() {
           </Text>
 
           <Text className="mt-1 text-base text-slate-600">
-            {modeData?.label ?? "Modo clásico"} · {difficultyData?.label ?? "Fácil"}
+            {modeData?.label ?? "Modo clásico"} ·{" "}
+            {difficultyData?.label ?? "Fácil"}
           </Text>
         </View>
-
-        <TouchableOpacity
-          onPress={() => router.replace("/home")}
-          className="rounded-full bg-white px-4 py-2 border border-slate-300"
-        >
-          <Text className="font-semibold text-slate-700">
-            Salir
-          </Text>
-        </TouchableOpacity>
+        <View className="w-xl flex-row items-center justify-between gap-4">
+          <TouchableOpacity
+            onPress={game.resetGame}
+            className="rounded-full border border-slate-300 bg-white px-4 py-2"
+          >
+            <Text className="font-semibold text-slate-700">
+              Reiniciar
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.replace("/home")}
+            className="rounded-full border border-slate-300 bg-white px-4 py-2"
+          >
+            <Text className="font-semibold text-slate-700">
+              Salir
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View className="mt-6">
         <AppCard>
           <View className="flex-row justify-between">
             <Text className="text-base font-semibold text-slate-600">
-              Pregunta {currentIndex}/{totalQuestions}
+              Pregunta {game.currentIndex}/{game.totalQuestions}
             </Text>
 
             <Text className="text-base font-semibold text-blue-700">
-              {score} pts
+              {game.score} pts
             </Text>
           </View>
 
-          <View className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
-            <View
-              className="h-full rounded-full bg-blue-600"
-              style={{ width: `${timerPercentage}%` }}
+          <View className="mt-4">
+            <TimerBar
+              remainingTime={game.remainingTime}
+              totalTime={game.timerTotal}
             />
           </View>
-
-          <Text className="mt-2 text-right text-sm font-semibold text-slate-500">
-            Tiempo restante: {remainingTime}s
-          </Text>
         </AppCard>
       </View>
 
@@ -353,7 +127,8 @@ export default function GameScreen() {
               </Text>
 
               <Text className="mt-5 text-center text-5xl font-bold text-slate-900">
-                {currentQuestion.operation.question} = {currentQuestion.shownAnswer}
+                {game.currentQuestion.operation.question} ={" "}
+                {game.currentQuestion.shownAnswer}
               </Text>
             </>
           ) : (
@@ -363,14 +138,14 @@ export default function GameScreen() {
               </Text>
 
               <Text className="mt-5 text-center text-5xl font-bold text-slate-900">
-                {currentQuestion.operation.question}
+                {game.currentQuestion.operation.question}
               </Text>
             </>
           )}
 
-          {feedback && (
+          {game.feedback && (
             <Text className="mt-5 text-center text-lg font-bold text-blue-700">
-              {feedback}
+              {game.feedback}
             </Text>
           )}
         </AppCard>
@@ -384,12 +159,10 @@ export default function GameScreen() {
             </Text>
 
             <TextInput
-              value={answerInput}
-              onChangeText={(text) =>
-                setAnswerInput(text.replace(/[^0-9-]/g, ""))
-              }
+              value={game.answerInput}
+              onChangeText={game.updateAnswerInput}
               keyboardType="numeric"
-              editable={!locked}
+              editable={!game.locked}
               placeholder="Ingresá el resultado"
               className="rounded-xl border border-slate-300 bg-white px-4 py-4 text-xl text-slate-900"
             />
@@ -397,7 +170,7 @@ export default function GameScreen() {
             <View className="mt-4">
               <AppButton
                 title="Responder"
-                onPress={submitTextAnswer}
+                onPress={game.submitTextAnswer}
               />
             </View>
           </AppCard>
@@ -408,7 +181,7 @@ export default function GameScreen() {
             <AppButton
               title="Verdadero"
               onPress={() =>
-                processAnswer({
+                game.processAnswer({
                   answered: true,
                   booleanAnswer: true,
                 })
@@ -419,7 +192,7 @@ export default function GameScreen() {
               title="Falso"
               variant="secondary"
               onPress={() =>
-                processAnswer({
+                game.processAnswer({
                   answered: true,
                   booleanAnswer: false,
                 })
@@ -430,13 +203,13 @@ export default function GameScreen() {
 
         {mode === "multiple_choice" ? (
           <View className="gap-4">
-            {currentQuestion.choices.map((choice) => (
+            {game.currentQuestion.choices.map((choice) => (
               <TouchableOpacity
                 key={choice}
-                disabled={locked}
+                disabled={game.locked}
                 activeOpacity={0.8}
                 onPress={() =>
-                  processAnswer({
+                  game.processAnswer({
                     answered: true,
                     userAnswer: choice,
                   })
@@ -454,33 +227,24 @@ export default function GameScreen() {
 
       <View className="mt-6">
         <AppCard>
-          <View className="flex-row justify-between">
-            <View>
-              <Text className="text-sm text-slate-500">
-                Correctas
-              </Text>
-              <Text className="text-2xl font-bold text-green-600">
-                {correctAnswers}
-              </Text>
-            </View>
+          <View className="flex-row gap-3">
+            <StatBox
+              label="Correctas"
+              value={game.correctAnswers}
+              variant="success"
+            />
 
-            <View>
-              <Text className="text-sm text-slate-500">
-                Incorrectas
-              </Text>
-              <Text className="text-2xl font-bold text-red-600">
-                {incorrectAnswers}
-              </Text>
-            </View>
+            <StatBox
+              label="Incorrectas"
+              value={game.incorrectAnswers}
+              variant="danger"
+            />
 
-            <View>
-              <Text className="text-sm text-slate-500">
-                Sin responder
-              </Text>
-              <Text className="text-2xl font-bold text-slate-700">
-                {unanswered}
-              </Text>
-            </View>
+            <StatBox
+              label="Sin resp."
+              value={game.unanswered}
+              variant="neutral"
+            />
           </View>
         </AppCard>
       </View>
