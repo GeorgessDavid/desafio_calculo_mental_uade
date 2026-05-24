@@ -1,15 +1,10 @@
 import { router } from "expo-router";
-import { useRef, useState } from "react";
-import {
-  Animated,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
+import { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import AppButton from "../components/AppButton";
-import AppCard from "../components/AppCard";
+import ConfigOptionCard from "../components/ConfigOptionCard";
+import StepIndicator from "../components/StepIndicator";
+
 import {
   DIFFICULTIES,
   GAME_MODES,
@@ -18,37 +13,25 @@ import {
 
 type ConfigStep = "difficulty" | "mode" | "questions";
 
+const getStepNumber = (step: ConfigStep) => {
+  if (step === "difficulty") return 1;
+  if (step === "mode") return 2;
+  return 3;
+};
+
 export default function ConfigScreen() {
   const [step, setStep] = useState<ConfigStep>("difficulty");
   const [difficulty, setDifficulty] = useState<string | null>(null);
   const [mode, setMode] = useState<string | null>(null);
 
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  const changeStep = (nextStep: ConfigStep) => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
-      setStep(nextStep);
-
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 180,
-        useNativeDriver: true,
-      }).start();
-    });
-  };
-
   const goBack = () => {
     if (step === "questions") {
-      changeStep("mode");
+      setStep("mode");
       return;
     }
 
     if (step === "mode") {
-      changeStep("difficulty");
+      setStep("difficulty");
       return;
     }
 
@@ -56,18 +39,23 @@ export default function ConfigScreen() {
   };
 
   const startGame = (questions: number) => {
+    if (!difficulty || !mode) return;
+
     router.push({
       pathname: "/game",
       params: {
-        difficulty: String(difficulty),
-        mode: String(mode),
+        difficulty,
+        mode,
         questions: String(questions),
       },
     });
   };
 
   return (
-    <ScrollView className="flex-1 bg-slate-100 px-6 pt-14">
+    <ScrollView
+      className="flex-1 bg-slate-100 px-6 pt-14"
+      contentContainerStyle={{ paddingBottom: 32 }}
+    >
       <Text className="text-3xl font-bold text-slate-900">
         Configuración
       </Text>
@@ -76,54 +64,27 @@ export default function ConfigScreen() {
         Elegí la dificultad, el modo de juego y la cantidad de preguntas.
       </Text>
 
-      <View className="mt-5 flex-row gap-2">
-        <View
-          className={`h-2 flex-1 rounded-full ${
-            step === "difficulty" ? "bg-blue-600" : "bg-slate-300"
-          }`}
-        />
-        <View
-          className={`h-2 flex-1 rounded-full ${
-            step === "mode" ? "bg-blue-600" : "bg-slate-300"
-          }`}
-        />
-        <View
-          className={`h-2 flex-1 rounded-full ${
-            step === "questions" ? "bg-blue-600" : "bg-slate-300"
-          }`}
-        />
-      </View>
+      <StepIndicator currentStep={getStepNumber(step)} totalSteps={3} />
 
-      <Animated.View style={{ opacity: fadeAnim }} className="mt-6">
+      <View className="mt-6">
         {step === "difficulty" && (
           <View className="gap-4">
             <Text className="text-xl font-bold text-slate-900">
-              1. Seleccioná la dificultad
+              Seleccioná la dificultad
             </Text>
 
             {DIFFICULTIES.map((item) => (
-              <TouchableOpacity
+              <ConfigOptionCard
                 key={item.id}
-                activeOpacity={0.8}
+                title={item.label}
+                description={item.description}
+                footer={`${item.timePerQuestion} segundos por operación`}
+                selected={difficulty === item.id}
                 onPress={() => {
                   setDifficulty(item.id);
-                  changeStep("mode");
+                  setStep("mode");
                 }}
-              >
-                <AppCard>
-                  <Text className="text-xl font-bold text-slate-900">
-                    {item.label}
-                  </Text>
-
-                  <Text className="mt-2 text-base text-slate-600">
-                    {item.description}
-                  </Text>
-
-                  <Text className="mt-3 text-base font-semibold text-blue-700">
-                    {item.timePerQuestion} segundos por operación
-                  </Text>
-                </AppCard>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         )}
@@ -131,28 +92,20 @@ export default function ConfigScreen() {
         {step === "mode" && (
           <View className="gap-4">
             <Text className="text-xl font-bold text-slate-900">
-              2. Seleccioná el modo de juego
+              Seleccioná el modo de juego
             </Text>
 
             {GAME_MODES.map((item) => (
-              <TouchableOpacity
+              <ConfigOptionCard
                 key={item.id}
-                activeOpacity={0.8}
+                title={item.label}
+                description={item.description}
+                selected={mode === item.id}
                 onPress={() => {
                   setMode(item.id);
-                  changeStep("questions");
+                  setStep("questions");
                 }}
-              >
-                <AppCard>
-                  <Text className="text-xl font-bold text-slate-900">
-                    {item.label}
-                  </Text>
-
-                  <Text className="mt-2 text-base text-slate-600">
-                    {item.description}
-                  </Text>
-                </AppCard>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         )}
@@ -160,31 +113,23 @@ export default function ConfigScreen() {
         {step === "questions" && (
           <View className="gap-4">
             <Text className="text-xl font-bold text-slate-900">
-              3. Seleccioná la cantidad de preguntas
+              Seleccioná la cantidad de preguntas
             </Text>
 
             {QUESTION_OPTIONS.map((item) => (
-              <TouchableOpacity
+              <ConfigOptionCard
                 key={item}
-                activeOpacity={0.8}
+                title={String(item)}
+                description="preguntas por ronda"
+                center
                 onPress={() => startGame(item)}
-              >
-                <AppCard>
-                  <Text className="text-center text-4xl font-bold text-blue-600">
-                    {item}
-                  </Text>
-
-                  <Text className="mt-2 text-center text-base text-slate-600">
-                    preguntas por ronda
-                  </Text>
-                </AppCard>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         )}
-      </Animated.View>
+      </View>
 
-      <View className="mb-10 mt-8">
+      <View className="mt-8">
         <AppButton
           title={step === "difficulty" ? "Volver al inicio" : "Volver"}
           variant="secondary"
