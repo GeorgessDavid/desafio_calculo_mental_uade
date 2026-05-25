@@ -216,3 +216,33 @@ También se implementaron componentes reutilizables como botones, tarjetas, enca
 
 ### Configuración | Modo de Juego
 ![Configuracion_ModoJuego](./assets/docs/game_mode_configuration_screen.png)
+
+### Configuración | Cantidad de Preguntas
+![Configuracion_Preguntas](./assets/docs/questions_configuration_screen.png)
+
+### Juego | Modo Clásico
+![Classic_Game](./assets/docs/classic_game.png)
+
+### Juego | Verdadero o Falso
+![True_False_Game](./assets/docs/true_false_game.png)
+
+### Juego | Multiple Choice
+![Multiple_Choice_Game](./assets/docs/multiple_choice_game.png)
+
+### Juego | Contrarreloj
+![Contrarreloj_game](./assets/docs/contrarreloj_game.png)
+
+### Juego | Reiniciar Partida
+![Restart_Button](./assets/docs/restart-button.png)
+
+### Resultado Final
+![Resultado_final](./assets/docs/result_screen.png)
+
+### Historial
+![Historial](./assets/docs/history_screen.png)
+
+### Historial | Mejor Resultado
+![Best_Result](./assets/docs/historic_best_score.png)
+
+### Historial | Limpiar historial
+![Limpiar_Historial](./assets/docs/clean_history.png)
