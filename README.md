@@ -1,56 +1,218 @@
-# Welcome to your Expo app 👋
+# Juego de Cálculo Mental
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Trabajo práctico individual desarrollado para la materia **Desarrollo de Aplicaciones I**.
 
-## Get started
+La aplicación fue desarrollada con **React Native**, utilizando **Expo** como entorno de desarrollo. El objetivo principal es implementar un juego de cálculo mental donde el usuario debe resolver operaciones matemáticas bajo presión de tiempo, registrando puntaje, precisión, velocidad de respuesta, historial y mejores puntajes.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Objetivo de la aplicación
 
-2. Start the app
+El objetivo de la aplicación es evaluar la capacidad del usuario para resolver operaciones matemáticas en un tiempo determinado.
 
-   ```bash
-   npx expo start
-   ```
+Durante cada partida, la aplicación genera operaciones aleatorias según la dificultad seleccionada. El usuario debe responder correctamente antes de que se agote el tiempo. Al finalizar la ronda, se muestran estadísticas del desempeño obtenido.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tecnologías utilizadas
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- React Native
+- Expo
+- Expo Router
+- TypeScript
+- NativeWind
+- AsyncStorage
+- Expo Vector Icons
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Instalación y ejecución
+
+Instalar dependencias:
 
 ```bash
-npm run reset-project
+pnpm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Ejecutar en entorno web:
+```bash
+pnpm web
+```
 
-### Other setup steps
+Ejecutar con Expo:
+```bash
+pnpm exec expo start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+---
 
-## Learn more
+## Funcionalidades implementadas
+La aplicación incluye las siguientes funcionalidades:
+- SplashScreen inicial.
+- Pantalla principal con acceso a nueva partida e historial.
+- Configuración de dificultad.
+- Configuración del modo de juego.
+- Generación aleatoria de operaciones matemáticas. 
+- Temporizador por pregunta según dificultad.
+- Registro derespuestas correctas, incorrectas y sin responder.
+- Cálculo de puntaje según precisión y velocidad.
+- Visualización de estadísticas finales.
+- Registro de historialde partidas.
+- Registro de mejorpuntaje histórico.
+- Persistencia local utilizando AsyncStorage.
+- Posibilidad de reiniciar la partida actual.
+- Limpieza del historial guardado.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Nivelesde dificultad
+La aplicación permite seleccionar tres niveles de dificultad:
+| Dificultad | Operaciones                                           | Tiempo por operación |
+| ---------- | ----------------------------------------------------- | -------------------- |
+| Fácil      | Sumas y restas simples                                | Mayor tiempo         |
+| Medio      | Sumas, restas y multiplicaciones                      | Tiempo intermedio    |
+| Difícil    | Operaciones más complejas, incluyendo división exacta | Menor tiempo         |
 
-## Join the community
+La dificultad afecta tanto la complejidad de las operaciones como el tiempo disponible para responder.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Modos de Juego
+### Modo clásico
+El usuario debe ingresar manualmente el resultado de la operación.
+
+Ejemplo:
+`8 + 5 = ?`
+
+---
+### Modo verdadero / falso
+La aplicación muestra una operación conun resultado propuesto. El usuario debe indicar si la afirmaciónes verdadera o falsa.
+
+--- 
+### Modo múltiple choice
+La aplicación muestra una operación y cuatro posibles respuestas. El usuario debe seleccionar la opción correcta.
+
+--- 
+### Modo contrarreloj
+El usuario responde operaciones de forma continua hasta fallar o hasta uqe se agote el tiempo total asignado.
+
+---
+## Sistema de puntaje
+El puntaje se calcula según la respuesta del usuario y el tiempo utilizado:
+| Situación                            | Puntaje |
+| ------------------------------------ | ------: |
+| Respuesta correcta rápida            |    +100 |
+| Respuesta correcta dentro del tiempo |     +70 |
+| Respuesta incorrecta                 |     -30 |
+| Sin respuesta                        |     -50 |
+
+Una respuesta seconsidera rápida cuando se responde antes de utilizar el 75% del tiempo disponible.
+
+---
+## Estadísticas finales
+Al finalizar una partida, la aplicación muestra:
+- Puntaje total.
+- Cantidad de respuestascorrectas.
+- Cantidad de respuestas incorrectas.
+- Cantidad de preguntas sin responder.
+- Precisión.
+- Tiempo promedio de respuesta.
+- Modo de juego utilizado.
+- Dificultad seleccionada.
+- Mejor puntaje histórico.
+
+---
+
+## Persistencia local
+La aplicación utiliza **AsyncStorage** para guardar localmente el historial de partidas.
+
+Cada resultado guardado incluye:
+- Fecha de la partida.
+- Puntaje obtenido.
+- Dificultad.
+- Modo de juego.
+- Cantidad de preguntas jugadas.
+- Respuestas correctas.
+- Respuestas incorrectas.
+- Preguntas sin responder.
+- Precisión
+- Tiempo promedio.
+
+La persistencia es exclusivamente local y no requiere conexión a internet.
+
+---
+## Estructura del proyecto
+```plain
+src/
+  app/
+    _layout.tsx
+    index.tsx
+    home.tsx
+    config.tsx
+    game.tsx
+    result.tsx
+    history.tsx
+
+  components/
+    AppButton.tsx
+    AppCard.tsx
+    AppHeader.tsx
+    FooterBar.tsx
+    TimerBar.tsx
+    StatBox.tsx
+    GameHeader.tsx
+    GameProgressCard.tsx
+    QuestionCard.tsx
+    AnswerSection.tsx
+    GameStatsCard.tsx
+
+  constants/
+    gameConfig.ts
+
+  hooks/
+    useGame.ts
+
+  logic/
+    buildQuestion.ts
+    calculateScore.ts
+    createGameResult.ts
+    generateChoices.ts
+    generateOperation.ts
+
+  storage/
+    gameStorage.ts
+
+  types/
+    game.ts
+```
+
+---
+## Decisiones de diseño
+Se decidió dividir la aplicación en pantallas simples y componentes reutilizables para facilitar el mantenimientodel código.
+
+La pantallade configuración se implementó como un flujo guiadodetres pasos:
+1. Selección de dificultad.
+2. Selección de modo de juego.
+3. Selección de cantidad de preguntas.
+
+La lógica principal de la partida se separó en uncustom hook llamado `useGame.ts`, encargado de manejar el estado del juego, el temporizador, la validación de respuestas, el puntaje y la finalización de la partida.
+
+Las funciones puras relacionadas con la generación de operaciones, opciones de respuesta y cálculo de resultados seubicaron en la carpeta `logic`.
+
+La persistencia local se centralizó en `gameStorage.ts`, utilizando AsyncStorage para guardar y recuperar el historial de partidas.
+
+También se implementaron componentes reutilizables como botones, tarjetas, encabezados, barra de navegación inferior, barra de tiempo y tarjetas de estadísticas.
+
+---
+## Capturas de Pantalla
+### Splash Screen
+![SplashScreen](./assets/docs/splash_screen.png)
+
+### Pantalla principal
+![Home](./assets/docs/home_screen.png)
+
+### Configuración | Dificultad
+![Configuracion_Dificultad](./assets/docs/difficulty_configuration_screen.png)
+
+### Configuración | Modo de Juego
+![Configuracion_ModoJuego](./assets/docs/game_mode_configuration_screen.png)
