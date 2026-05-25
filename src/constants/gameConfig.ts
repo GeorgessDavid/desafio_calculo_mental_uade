@@ -37,7 +37,7 @@ export const GAME_MODES = [
   },
   {
     id: "time_attack",
-    label: "Contra reloj",
+    label: "Contrarreloj",
     description: "Respondés continuamente hasta fallar o quedarte sin tiempo.",
   },
 ] as const;

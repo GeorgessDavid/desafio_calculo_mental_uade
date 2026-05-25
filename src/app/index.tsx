@@ -1,33 +1,7 @@
-
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { Text, View } from 'react-native';
-
-// import { AnimatedIcon } from '@/components/animated-icon';
-// import { HintRow } from '@/components/hint-row';
-// import { ThemedText } from '@/components/themed-text';
-// import { ThemedView } from '@/components/themed-view';
-// import { WebBadge } from '@/components/web-badge';
-// import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-// function getDevMenuHint() {
-//   // if (Platform.OS === 'web') {
-//   //   return <ThemedText type="small">use browser devtools</ThemedText>;
-//   // }
-//   // if (Device.isDevice) {
-//   //   return (
-//   //     <ThemedText type="small">
-//   //       shake device or press <ThemedText type="code">m</ThemedText> in terminal
-//   //     </ThemedText>
-//   //   );
-//   // }
-//   // const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-//   // return (
-//   //   <ThemedText type="small">
-//   //     press <ThemedText type="code">{shortcut}</ThemedText>
-//   //   </ThemedText>
-//   // );
-// }
+import { Image, Text, View } from 'react-native';
+const splashImage = require('../../assets/images/splash-icon.png')
 
 export default function SplashScreen() {
   useEffect(() => {
@@ -39,6 +13,7 @@ export default function SplashScreen() {
   })
   return (
     <View className="flex-1 items-center justify-center bg-blue-600 px-6">
+      <Image source={splashImage} style={{ width: 80, height: 60, marginBottom: 20 }} />
       <Text className="text-4xl font-bold text-white text-center">
         Cálculo Mental
       </Text>

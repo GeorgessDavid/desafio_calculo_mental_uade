@@ -1,11 +1,12 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 import BestScoreCard from "../components/BestScoreCard";
 import { GameResult, getBestScore } from "../storage/gameStorage";
+const image = require('../../assets/images/android-icon-foreground.png');
 
 export default function HomeScreen() {
   const [bestScore, setBestScore] = useState<GameResult | null>(null);
@@ -20,7 +21,8 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View className="flex-1 justify-center bg-slate-100 px-6">
+    <View className="flex-1 flex flex-col w-full items-center justify-center bg-slate-100 px-6">
+      <Image source={image} style={{ width: 50, height: 80 }} />
       <View className="mb-8">
         <Text className="text-center text-3xl font-bold text-slate-900">
           Juego de Cálculo Mental
