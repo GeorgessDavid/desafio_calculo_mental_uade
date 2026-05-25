@@ -1,3 +1,5 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type GameHeaderProps = {
@@ -5,6 +7,7 @@ type GameHeaderProps = {
   subtitle: string;
   onReset: () => void;
   onExit: () => void;
+  onBack?: () => void;
 };
 
 export default function GameHeader({
@@ -12,36 +15,55 @@ export default function GameHeader({
   subtitle,
   onReset,
   onExit,
+  onBack,
 }: GameHeaderProps) {
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+
+    router.back();
+  };
+
   return (
-    <View>
-      <View>
+    <View className="flex-row items-center justify-between gap-3">
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={handleBack}
+        className="h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white"
+      >
+        <Ionicons name="chevron-back" size={22} color="#334155" />
+      </TouchableOpacity>
+
+      <View className="flex-1">
         <Text className="text-3xl font-bold text-slate-900">
           {title}
         </Text>
 
-        <Text className="mt-1 text-base text-slate-600">
+        <Text
+          className="mt-1 text-base text-slate-600"
+          numberOfLines={1}
+        >
           {subtitle}
         </Text>
       </View>
 
-      <View className="mt-4 flex-row gap-3">
+      <View className="flex-row gap-2 me-4">
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={onReset}
-          className="flex-1 rounded-full border border-slate-300 bg-white px-4 py-2"
+          className="h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white"
         >
-          <Text className="text-center font-semibold text-slate-700">
-            Reiniciar
-          </Text>
+          <Ionicons name="refresh-outline" size={21} color="#334155" />
         </TouchableOpacity>
 
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={onExit}
-          className="flex-1 rounded-full border border-slate-300 bg-white px-4 py-2"
+          className="h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white"
         >
-          <Text className="text-center font-semibold text-slate-700">
-            Salir
-          </Text>
+          <Ionicons name="exit-outline" size={21} color="#334155" />
         </TouchableOpacity>
       </View>
     </View>

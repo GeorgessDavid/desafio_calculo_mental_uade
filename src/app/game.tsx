@@ -72,6 +72,7 @@ export default function GameScreen() {
         title="Partida"
         subtitle={`${modeData?.label ?? "Modo clásico"} · ${difficultyData?.label ?? "Fácil"
           }`}
+        onBack={() => router.back()}
         onReset={game.resetGame}
         onExit={() => router.replace("/home")}
       />

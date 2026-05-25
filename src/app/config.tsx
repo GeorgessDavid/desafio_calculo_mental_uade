@@ -2,7 +2,9 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import AppButton from "../components/AppButton";
+import AppHeader from '../components/AppHeader';
 import ConfigOptionCard from "../components/ConfigOptionCard";
+import FooterBar from "../components/FooterBar";
 import StepIndicator from "../components/StepIndicator";
 
 import {
@@ -52,90 +54,90 @@ export default function ConfigScreen() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-slate-100 px-6 pt-14"
-      contentContainerStyle={{ paddingBottom: 32 }}
-    >
-      <Text className="text-3xl font-bold text-slate-900">
-        Configuración
-      </Text>
+    <View className="flex-1">
+      <AppHeader title="Configuración" />
+      <ScrollView
+        className="flex-1 bg-slate-100 px-6 pt-14"
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        <Text className="mt-2 text-base text-slate-600">
+          Elegí la dificultad, el modo de juego y la cantidad de preguntas.
+        </Text>
 
-      <Text className="mt-2 text-base text-slate-600">
-        Elegí la dificultad, el modo de juego y la cantidad de preguntas.
-      </Text>
+        <StepIndicator currentStep={getStepNumber(step)} totalSteps={3} />
 
-      <StepIndicator currentStep={getStepNumber(step)} totalSteps={3} />
+        <View className="mt-6">
+          {step === "difficulty" && (
+            <View className="gap-4">
+              <Text className="text-xl font-bold text-slate-900">
+                Seleccioná la dificultad
+              </Text>
 
-      <View className="mt-6">
-        {step === "difficulty" && (
-          <View className="gap-4">
-            <Text className="text-xl font-bold text-slate-900">
-              Seleccioná la dificultad
-            </Text>
+              {DIFFICULTIES.map((item) => (
+                <ConfigOptionCard
+                  key={item.id}
+                  title={item.label}
+                  description={item.description}
+                  footer={`${item.timePerQuestion} segundos por operación`}
+                  selected={difficulty === item.id}
+                  onPress={() => {
+                    setDifficulty(item.id);
+                    setStep("mode");
+                  }}
+                />
+              ))}
+            </View>
+          )}
 
-            {DIFFICULTIES.map((item) => (
-              <ConfigOptionCard
-                key={item.id}
-                title={item.label}
-                description={item.description}
-                footer={`${item.timePerQuestion} segundos por operación`}
-                selected={difficulty === item.id}
-                onPress={() => {
-                  setDifficulty(item.id);
-                  setStep("mode");
-                }}
-              />
-            ))}
-          </View>
-        )}
+          {step === "mode" && (
+            <View className="gap-4">
+              <Text className="text-xl font-bold text-slate-900">
+                Seleccioná el modo de juego
+              </Text>
 
-        {step === "mode" && (
-          <View className="gap-4">
-            <Text className="text-xl font-bold text-slate-900">
-              Seleccioná el modo de juego
-            </Text>
+              {GAME_MODES.map((item) => (
+                <ConfigOptionCard
+                  key={item.id}
+                  title={item.label}
+                  description={item.description}
+                  selected={mode === item.id}
+                  onPress={() => {
+                    setMode(item.id);
+                    setStep("questions");
+                  }}
+                />
+              ))}
+            </View>
+          )}
 
-            {GAME_MODES.map((item) => (
-              <ConfigOptionCard
-                key={item.id}
-                title={item.label}
-                description={item.description}
-                selected={mode === item.id}
-                onPress={() => {
-                  setMode(item.id);
-                  setStep("questions");
-                }}
-              />
-            ))}
-          </View>
-        )}
+          {step === "questions" && (
+            <View className="gap-4">
+              <Text className="text-xl font-bold text-slate-900">
+                Seleccioná la cantidad de preguntas
+              </Text>
 
-        {step === "questions" && (
-          <View className="gap-4">
-            <Text className="text-xl font-bold text-slate-900">
-              Seleccioná la cantidad de preguntas
-            </Text>
+              {QUESTION_OPTIONS.map((item) => (
+                <ConfigOptionCard
+                  key={item}
+                  title={String(item)}
+                  description="preguntas por ronda"
+                  center
+                  onPress={() => startGame(item)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
 
-            {QUESTION_OPTIONS.map((item) => (
-              <ConfigOptionCard
-                key={item}
-                title={String(item)}
-                description="preguntas por ronda"
-                center
-                onPress={() => startGame(item)}
-              />
-            ))}
-          </View>
-        )}
-      </View>
-
-      <View className="mt-8">
-        <AppButton
-          title={step === "difficulty" ? "Volver al inicio" : "Volver"}
-          variant="secondary"
-          onPress={goBack}
-        />
-      </View>
-    </ScrollView>
+        <View className="mt-8">
+          <AppButton
+            title={step === "difficulty" ? "Volver al inicio" : "Volver"}
+            variant="secondary"
+            onPress={goBack}
+          />
+        </View>
+      </ScrollView>
+      <FooterBar />
+    </View>
   );
 }
